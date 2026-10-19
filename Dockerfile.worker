@@ -1,0 +1,20 @@
+FROM python:3.12-slim
+
+# Install system compilers and dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    g++ \
+    gcc \
+    default-jdk \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY backend/ .
+
+CMD ["python", "-c", "from app.workers.job_queue import PersistentJobQueue; import time; PersistentJobQueue.ensure_worker_running(); time.sleep(999999999)"]
